@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MindPlay: The Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b3a4a;--pri:#ff7a59;--sec:#2fa595;--sun:#ffd166;--pur:#8e7cc3;--paper:#fffaf0}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;font-family:Fredoka,"Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:#bfe6f5}
+canvas{display:block}.hide{display:none!important}
+.ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:10;text-align:center;padding:20px;background:radial-gradient(circle at 50% 30%,rgba(255,240,200,.85),rgba(150,215,205,.88))}
+.logo{font-size:15px;font-weight:600;letter-spacing:.04em;background:var(--ink);color:var(--sun);padding:6px 16px;border-radius:99px}
+h1{font-size:clamp(40px,8vw,84px);margin:0;line-height:.95;font-weight:600;text-shadow:0 4px 0 #fff8}
+h2{margin:0 0 8px;font-size:26px}p{line-height:1.5;margin:6px 0}
+.btn{font:inherit;font-weight:500;font-size:18px;border:0;border-radius:99px;padding:12px 28px;background:var(--pri);color:#fff;cursor:pointer;box-shadow:0 5px 0 #c4502f;transition:transform .12s}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #c4502f}
+.btn.alt{background:var(--sec);box-shadow:0 5px 0 #1c7569}.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 #cfc7b5}
+.menu{display:flex;flex-direction:column;gap:12px;margin-top:14px;min-width:240px}
+.names{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;max-width:560px;width:100%}
+.names .btn{background:#fff;color:var(--ink);box-shadow:0 5px 0 #cfc7b5;display:flex;flex-direction:column;align-items:center;gap:2px}
+.names .btn small{font-size:12px;color:var(--sec)}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+.pill{position:absolute;top:14px;left:14px;background:#fffaf0ee;border-radius:22px;padding:10px 16px;box-shadow:0 6px 18px #0002;min-width:210px}
+.pill b{font-size:18px}.bar{height:9px;border-radius:9px;background:#e8dfcc;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--pri));transition:width .5s}
+#qp{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:#2b3a4acc;color:#fff;border-radius:99px;padding:8px 18px;font-size:15px;white-space:nowrap}
+#mm{position:absolute;top:14px;right:14px;border-radius:50%;border:4px solid #fffaf0;box-shadow:0 6px 18px #0003;width:130px;height:130px}
+#prompt{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);background:#fffaf0;border-radius:20px;padding:10px 22px;box-shadow:0 8px 24px #0003;text-align:center;font-size:18px}
+#prompt small{display:block;color:#7a8794;font-size:13px}
+kbd{background:var(--ink);color:#fff;border-radius:8px;padding:2px 9px;font-family:inherit;font-weight:600;margin-right:6px}
+#hint{position:absolute;bottom:14px;left:14px;color:#fff;font-size:13px;text-shadow:0 1px 4px #0008}
+#toasts{position:absolute;top:70px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:#fffaf0;border-radius:99px;padding:9px 20px;box-shadow:0 6px 18px #0003;animation:pop .35s;font-size:16px}.toast.gold{background:var(--sun)}.toast.good{background:#c9f0d8}
+@keyframes pop{from{transform:scale(.7);opacity:0}}
+#modal{position:fixed;inset:0;z-index:30;background:#2b3a4a73;display:flex;align-items:center;justify-content:center;padding:12px}
+.panel{background:var(--paper);border-radius:28px;padding:26px;width:min(540px,100%);max-height:88vh;overflow:auto;box-shadow:0 20px 60px #0005;animation:pop .25s}
+.panel label{display:block;margin:12px 0 4px;font-weight:500}
+.panel input,.panel select,.panel textarea{width:100%;font:inherit;border:2px solid #e2d8c2;border-radius:14px;padding:10px 12px;background:#fff;color:var(--ink)}
+.panel textarea{min-height:110px;resize:vertical}
+.note{background:#e3f4f0;border-radius:14px;padding:10px 14px;font-size:14px;margin:12px 0}
+.tag{display:inline-block;background:var(--pur);color:#fff;border-radius:99px;padding:3px 14px;font-size:14px}
+.say{font-size:20px}.who{font-weight:600;color:var(--sec)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{font:inherit;font-size:13px;border:2px solid #e2d8c2;background:#fff;border-radius:99px;padding:4px 12px;cursor:pointer}
+.li{padding:8px 12px;border-radius:14px;background:#fff;margin:6px 0;font-size:15px}.li small{color:#7a8794}
+.mood{font-size:28px;background:none;border:0;cursor:pointer;transition:transform .1s}.mood:hover{transform:scale(1.3)}
+.hbar{height:12px;border-radius:9px;background:var(--sec);margin:3px 0 8px}
+</style></head><body>
+<div id="hud" class="hide">
+ <div class="pill"><b id="hn"></b> <span id="hl"></span><div class="bar"><i id="hx"></i></div><small id="hxt"></small></div>
+ <div id="qp"></div><canvas id="mm" width="130" height="130"></canvas>
+ <div id="toasts"></div><div id="prompt" class="hide"></div>
+ <div id="hint">WASD/Panah: jalan · Shift: lari · Seret mouse: kamera · Scroll: zoom · E: interaksi · Esc: jeda</div>
+</div>
+<div id="menu" class="ov">
+ <span class="logo">MindPlay</span><h1>The Journey</h1>
+ <p>Petualangan 3D untuk saling mendengar dan saling menguatkan.</p>
+ <div class="menu"><button class="btn" onclick="showSelect()">Play Game</button><button class="btn alt" onclick="howTo()">How to Play</button><button class="btn ghost" onclick="about()">About MindPlay</button></div>
+</div>
+<div id="select" class="ov hide"><h2 style="font-size:36px">Siapa yang bermain hari ini?</h2><p>Pilih namamu. Data contoh, tanpa pendaftaran.</p><div class="names" id="names"></div><button class="btn ghost" onclick="$('#select').classList.add('hide');$('#menu').classList.remove('hide')">Kembali</button></div>
+<div id="pause" class="ov hide"><h1 style="font-size:48px">Jeda</h1><div class="menu"><button class="btn" onclick="resume()">Lanjutkan</button><button class="btn alt" id="snd" onclick="toggleSnd()">Suara: aktif</button><button class="btn ghost" onclick="toMenu()">Ganti pemain</button><button class="btn ghost" onclick="resetAll()">Reset data prototype</button></div></div>
+<div id="modal" class="hide"><div class="panel" id="mbody"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KEY='mindplay_journey_v1',NAMES=['Andi','Budi','Citra','Dinda','Fajar','Nabila','Rizky','Salsabila'];
+const CATS={Friendship:'Pertemanan',Bullying:'Bullying',Family:'Keluarga',School:'Sekolah','Self Confidence':'Percaya Diri','Social Anxiety':'Cemas Sosial'};
+const AREA_OF={Friendship:'park',Bullying:'play',Family:'garden',School:'school','Self Confidence':'reflect','Social Anxiety':'reflect'};
+const AREAS={plaza:[0,0],school:[-20,-18],garden:[22,-14],play:[-22,14],park:[22,16],reflect:[0,31]};
+const ORBC={plaza:[0,0],school:[-20,-8],garden:[22,-14],play:[-22,14],park:[22,16],reflect:[0,20]};
+const AN={plaza:'Central Plaza',school:'Gedung Sekolah',garden:'Taman Bunga',play:'Playground',park:'Friendship Park',reflect:'Area Refleksi'};
+const CATCOL={Friendship:0xff8fab,Bullying:0xff9f43,Family:0x7bd88f,School:0x6ec1ff,'Self Confidence':0xffd166,'Social Anxiety':0xb59cff};
+const TIPS=['Tarik napas 4 detik, tahan 4 detik, hembuskan 6 detik. Ulangi tiga kali.','Menyapa satu teman hari ini bisa membuat harinya lebih ringan.','Tidak apa-apa merasa tidak baik-baik saja. Bercerita itu langkah yang berani.','Mendengarkan tanpa menghakimi adalah hadiah terbaik untuk teman.'];
+const ACH=[['help1','🌱 Teman Pertama',p=>p.done.length>=1],['help3','💛 Hati Hangat',p=>p.done.length>=3],['brave','🕊️ Suara Berani',p=>p.shared>=1],['explore','🧭 Penjelajah',p=>p.visited.length>=6],['mood','🌤️ Peduli Diri',p=>p.moods.length>=1]];
+const SHIRTS=[0xff7a59,0x4fb8a6,0xb59cff,0xff8fab,0x6ec1ff,0x7bd88f,0xffb347,0xe56b9f];
+function seed(){const s=(t,d,c)=>({id:'s'+Math.random().toString(36).slice(2,7),title:t,desc:d,cat:c,author:'seed',solutions:[],status:'available'});
+ return{players:{},quests:[s('Merasa tidak dianggap','Aku merasa tidak dianggap oleh teman-temanku ketika sedang berkumpul. Mereka seperti tidak mendengar kalau aku bicara.','Friendship'),
+ s('Diejek soal penampilan','Ada teman yang sering mengejek penampilanku di kelas. Aku jadi malas masuk sekolah.','Bullying'),
+ s('Orang tua sering bertengkar','Di rumah orang tuaku sering bertengkar. Aku jadi sulit konsentrasi belajar.','Family'),
+ s('Takut nilai jelek','Aku takut sekali nilaiku turun dan mengecewakan semua orang.','School'),
+ s('Tidak percaya diri presentasi','Setiap disuruh maju ke depan kelas, tanganku gemetar dan aku lupa semuanya.','Self Confidence'),
+ s('Sulit memulai obrolan','Aku ingin punya teman baru, tapi jantungku berdebar kalau harus memulai bicara.','Social Anxiety')]}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.quests)return d}catch(e){}return seed()}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+let db=load(),me=null,P=null,state='menu',modal=false,snd=true;
+const lvl=()=>Math.floor(P.xp/60)+1;
+/* ---------- THREE ---------- */
+let renderer;try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){document.body.innerHTML='<div class="ov"><h1 style="font-size:40px">WebGL tidak tersedia</h1><p>Browser atau perangkat ini belum mendukung WebGL. Coba Chrome, Edge, atau Firefox terbaru di komputer.</p></div>';throw e}
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.setSize(innerWidth,innerHeight);document.body.prepend(renderer.domElement);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,300);
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
+const M={},mat=c=>M[c]||(M[c]=new THREE.MeshLambertMaterial({color:c}));
+const mk=(g,c,x,y,z,p)=>{const m=new THREE.Mesh(g,mat(c));m.position.set(x,y,z);(p||scene).add(m);return m};
+const box=(w,h,d,c,x,y,z,p)=>mk(new THREE.BoxGeometry(w,h,d),c,x,y,z,p),cyl=(a,b,h,c,x,y,z,p,s=10)=>mk(new THREE.CylinderGeometry(a,b,h,s),c,x,y,z,p),
+cone=(r,h,c,x,y,z,p,s=8)=>mk(new THREE.ConeGeometry(r,h,s),c,x,y,z,p),sph=(r,c,x,y,z,p)=>mk(new THREE.SphereGeometry(r,10,8),c,x,y,z,p),
+disc=(r,c,y,x=0,z=0)=>{const m=mk(new THREE.CircleGeometry(r,32),c,x,y,z);m.rotation.x=-Math.PI/2;return m};
+const COL=[],STAT=[],col=(x,z,r,h=3)=>COL.push({x,z,r,h}),act=(x,z,name,label,fn,r=3.4)=>STAT.push({x,z,name,label,fn,r});
+let sd=7;const rnd=()=>(sd=sd*16807%2147483647)/2147483647;
+const swings=[],clouds=[];
+function limb(w,h,d,c,x,y,z,p){const g=new THREE.Group();g.position.set(x,y,z);p.add(g);box(w,h,d,c,0,-h/2,0,g);return g}
+function makeChar(shirt,pants,hair){const g=new THREE.Group(),sk=0xf1c9a0;
+ box(.8,.9,.5,shirt,0,1.35,0,g);sph(.42,sk,0,2.2,0,g);const h=sph(.45,hair,0,2.33,-.05,g);h.scale.y=.7;
+ box(.09,.12,.05,0x2b3a4a,-.15,2.22,.4,g);box(.09,.12,.05,0x2b3a4a,.15,2.22,.4,g);
+ g.userData={aL:limb(.25,.8,.25,shirt,-.55,1.75,0,g),aR:limb(.25,.8,.25,shirt,.55,1.75,0,g),lL:limb(.3,.9,.3,pants,-.2,.9,0,g),lR:limb(.3,.9,.3,pants,.2,.9,0,g)};
+ scene.add(g);return g}
+function label(t,x,y,z){const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');g.fillStyle=g.strokeStyle='rgba(255,250,240,.92)';g.lineJoin='round';g.lineWidth=36;g.strokeRect(30,30,452,68);g.fillRect(30,30,452,68);g.fillStyle='#2b3a4a';g.font='600 48px sans-serif';g.textAlign='center';g.fillText(t,256,82);
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),fog:false}));s.position.set(x,y,z);s.scale.set(8,2,1);scene.add(s)}
+let pg,npcMaya,npcBK,fm,hat,cape;
+function build(){
+ scene.background=new THREE.Color(0xbfe6f5);scene.fog=new THREE.Fog(0xbfe6f5,70,190);
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8fbf8f,.9));const sun=new THREE.DirectionalLight(0xfff1d0,.8);sun.position.set(30,50,20);scene.add(sun);
+ const w=mk(new THREE.PlaneGeometry(600,600),0x5ec8e5,0,-.6,0);w.rotation.x=-Math.PI/2;
+ disc(49,0xf3e2b0,-.05);disc(44,0x8fd48f,0);
+ const dcol={plaza:0xf5e7c8,school:0xf5e7c8,garden:0xa8e0a0,play:0xf7d9a0,park:0xbfe8b8,reflect:0xa9e0cf};
+ for(const k in AREAS){const[x,z]=AREAS[k];disc(k==='plaza'?10:9,dcol[k],.03,x,z);if(k!=='plaza'){const dx=x,dz=z,len=Math.hypot(dx,dz)-14,g=new THREE.Group();g.position.set(dx/2,0,dz/2);g.rotation.y=Math.atan2(dx,dz);scene.add(g);const p=mk(new THREE.PlaneGeometry(3,len),0xf0dcb0,0,.05,0,g);p.rotation.x=-Math.PI/2;label(AN[k],x,k==='school'?11:7.5,z)}}
+ label('Central Plaza',0,7,0);
+ // Plaza
+ cyl(2.6,2.8,.7,0xcfd8dc,0,.35,0);cyl(2.2,2.2,.75,0x7fd3ea,0,.4,0);cyl(.3,.4,2.4,0xcfd8dc,0,1.5,0);sph(.55,0x7fd3ea,0,2.8,0);col(0,0,2.9);
+ let g=new THREE.Group();g.position.set(-6,0,-4);g.rotation.y=.98;scene.add(g);cyl(.18,.18,3,0x8b5e3c,-1.5,1.5,0,g,6);cyl(.18,.18,3,0x8b5e3c,1.5,1.5,0,g,6);box(3.8,2,.25,0xb07a4f,0,2.3,0,g);[[-.9,0xfff3a8],[.3,0xffc9d6],[1,0xc9f0d8]].forEach(([x,c])=>box(.8,.8,.05,c,x,2.3,.15,g));col(-6,-4,2);
+ act(-6,-4,'Papan Misi','untuk Melihat Papan Misi',showBoard,3.8);
+ cyl(.12,.12,1.8,0x8b5e3c,0,.9,-7,undefined,6);box(1,.8,.7,0xe56b6f,0,2,-7);box(.5,.1,.05,0xffd166,0,2.5,-6.6);col(0,-7,.8);act(0,-7,'Kotak Cerita','untuk Menulis Masalahmu (Submit Problem)',formProblem);
+ npcMaya=makeChar(0x2fa595,0x3f4e66,0x3a2a22);npcMaya.position.set(5,0,3);act(5,3,'Kak Maya (Pemandu)','untuk Mengobrol',()=>say('Kak Maya',['Halo! Aku Kak Maya. Selamat datang di The Journey World, pulau tempat teman-teman saling menguatkan.','Orb bercahaya di Taman, Playground, Friendship Park, Gedung Sekolah, dan Area Refleksi adalah misi dari teman-teman. Dekati lalu tekan E untuk memberi perspektif yang ramah.','Kalau kamu ingin bercerita, tulis di Kotak Cerita di Plaza. Ceritamu menjadi misi tanpa nama, tidak ada yang tahu itu darimu.','Ingat: dukungan teman itu berharga, tapi tidak menggantikan Guru BK. Temui Guru BK di Gedung Sekolah kalau kamu butuh bantuan lebih. Selamat berpetualang!']));col(5,3,.6);
+ // School
+ const sg=new THREE.Group();sg.position.set(-20,0,-18);scene.add(sg);box(14,6,7,0xffe0a3,0,3,0,sg);box(15,.8,8,0xe56b6f,0,6.4,0,sg);box(4,3,3.5,0xffd68a,0,8.3,0,sg);cone(3.2,2,0xe56b6f,0,11,0,sg,4);box(2.2,3.2,.3,0x7b4b2a,0,1.6,3.6,sg);box(5,1,.3,0x2fa595,0,5.2,3.6,sg);[-5,-3,3,5].forEach(x=>box(1.4,1.4,.3,0x9bd8f0,x,3.2,3.6,sg));cyl(.1,.1,7,0xcfd8dc,9,3.5,3,sg,6);box(1.6,1,.1,0xff7a59,9.8,6.6,3,sg);
+ [-25,-21,-17,-14].forEach(x=>col(x,-18,3.8,8));
+ npcBK=makeChar(0x8e7cc3,0x3f4e66,0x6b4a2f);npcBK.position.set(-16,0,-11);act(-16,-11,'Guru BK','untuk Menemui Guru BK',guruBK);col(-16,-11,.6);
+ // Garden
+ [-4,0,4].forEach(o=>{box(6,.5,2.2,0x8b5e3c,22,.25,-14+o,undefined);[-2,-1,0,1,2].forEach((f,i)=>sph(.3,[0xff8fab,0xffd166,0xb59cff,0xffffff,0xff9f43][(i+o+8)%5],22+f,.8,-14+o))});
+ box(2.4,.4,.8,0xb07a4f,27,.6,-14);box(2.4,.8,.2,0xb07a4f,27,1,-14.4);col(27,-14,1.3);act(27,-14,'Bangku Taman','untuk Menjelajah (Explore)',()=>tip());
+ // Playground
+ box(2,3,2,0xff7a59,-24,1.5,12);const rp=box(1.6,.2,5,0xffd166,-24,1.5,15.3);rp.rotation.x=.6;col(-24,13,2.2);
+ cyl(.1,.1,4,0xcfd8dc,-20,2,16,undefined,6);cyl(.1,.1,4,0xcfd8dc,-16,2,16,undefined,6);const bar=cyl(.1,.1,4.2,0xcfd8dc,-18,4,16,undefined,6);bar.rotation.z=Math.PI/2;col(-20,16,.5);col(-16,16,.5);
+ [-19,-17].forEach(x=>{const s=new THREE.Group();s.position.set(x,4,16);scene.add(s);cyl(.04,.04,2.6,0x8b5e3c,0,-1.3,0,s,4);box(.9,.12,.5,0x4fb8a6,0,-2.6,0,s);swings.push(s)});
+ box(5,.3,5,0xf2d98d,-22,.15,19);act(-18,19,'Ayunan','untuk Menjelajah (Explore)',()=>tip());
+ // Park
+ cyl(4.2,4.2,.3,0xf6e6d0,22,.15,16,undefined,16);for(let i=0;i<6;i++){const a=i*Math.PI/3;cyl(.25,.25,3.6,0xffffff,22+Math.cos(a)*3.7,2,16+Math.sin(a)*3.7,undefined,6);col(22+Math.cos(a)*3.7,16+Math.sin(a)*3.7,.4)}
+ cone(5.4,2.6,0xe56b6f,22,5.6,16,undefined,6);sph(.5,0xffd166,22,7.2,16);box(2.4,.4,.8,0xb07a4f,22,.6,16);act(22,16,'Gazebo Persahabatan','untuk Menjelajah (Explore)',()=>tip(),4);
+ // Reflection
+ const pd=disc(4.6,0x7fd3ea,.07,0,34);col(0,34,4.7,.5);[[-4,34],[3.5,36],[1,38]].forEach(([x,z])=>sph(.6,0xb0bec5,x,.2,z));
+ box(3.2,.3,1,0xb07a4f,0,.8,27);box(3.2,.8,.2,0xb07a4f,0,1.3,26.6);cyl(.15,.15,.8,0x8b5e3c,-1.3,.4,27,undefined,5);cyl(.15,.15,.8,0x8b5e3c,1.3,.4,27,undefined,5);col(0,27,1.8,1.5);act(0,27,'Bangku Refleksi','untuk Duduk & Refleksi',reflect,3.8);
+ [-5,5].forEach(x=>{cyl(.1,.1,3,0x6b4a2f,x,1.5,28,undefined,5);const l=new THREE.Mesh(new THREE.SphereGeometry(.35,8,6),new THREE.MeshBasicMaterial({color:0xffe08a}));l.position.set(x,3.2,28);scene.add(l)});
+ cyl(.5,.7,4,0x8b5e3c,-9,2,31,undefined,6);sph(3,0x6fc78a,-9,5.2,31);col(-9,31,.9,6);
+ // Trees (instanced)
+ const N=48,tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.25,.35,1.6,6),mat(0x8b5e3c),N),f1=new THREE.InstancedMesh(new THREE.ConeGeometry(1.7,2.6,7),mat(0x3f9d5a),N),f2=new THREE.InstancedMesh(new THREE.ConeGeometry(1.2,2.2,7),mat(0x56b86b),N),d=new THREE.Object3D();
+ for(let i=0;i<N;){const a=rnd()*6.283,r=13+rnd()*28,x=Math.cos(a)*r,z=Math.sin(a)*r;if(Object.values(AREAS).some(([ax,az])=>Math.hypot(x-ax,z-az)<(ax==-20&&az==-18?14:11)))continue;const k=.8+rnd()*.6;
+  [[tr,.8],[f1,2.6],[f2,4.2]].forEach(([m,y])=>{d.position.set(x,y*k,z);d.scale.setScalar(k);d.updateMatrix();m.setMatrixAt(i,d.matrix)});col(x,z,.7*k,5);i++}
+ scene.add(tr,f1,f2);
+ const FL=170;fm=new THREE.InstancedMesh(new THREE.SphereGeometry(.28,6,4),new THREE.MeshLambertMaterial({color:0xffffff}),FL);const cc=[0xff8fab,0xffd166,0xb59cff,0xffffff,0xff9f43],tc=new THREE.Color();
+ for(let i=0;i<FL;){const a=rnd()*6.283,r=6+rnd()*34,x=Math.cos(a)*r,z=Math.sin(a)*r;if(Math.hypot(x+20,z+18)<13)continue;d.position.set(x,.3,z);d.scale.setScalar(1);d.updateMatrix();fm.setMatrixAt(i,d.matrix);fm.setColorAt(i,tc.set(cc[i%5]));i++}
+ scene.add(fm);
+ for(let i=0;i<6;i++){const c=new THREE.Group();[[0,0],[2,.3],[-2,.2]].forEach(([x,y],j)=>{const s=sph(1.6-j*.1,0xffffff,x,y,0,c);s.scale.y=.6});c.position.set(-80+i*34,28+rnd()*8,-60+rnd()*120);scene.add(c);clouds.push(c)}
+ pg=makeChar(0xff7a59,0x3f4e66,0x4a2f1f);hat=cone(.5,.7,0xffd166,0,2.95,0,pg);cape=box(.9,1.2,.1,0x8e7cc3,0,1.4,-.35,pg);pg.visible=false;
+ initFx();
+}
+/* ---------- FX & AUDIO ---------- */
+let fx,fxd=[];function initFx(){const n=80,geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3).fill(-999),3));fx=new THREE.Points(geo,new THREE.PointsMaterial({color:0xffd166,size:.45,transparent:true,depthWrite:false}));fx.frustumCulled=false;scene.add(fx);for(let i=0;i<n;i++)fxd.push({l:0,v:new THREE.Vector3()})}
+function burst(x,y,z){const p=fx.geometry.attributes.position;let c=0;fxd.forEach((q,i)=>{if(q.l<=0&&c<40){c++;q.l=1.2;q.v.set((Math.random()-.5)*5,Math.random()*5+2,(Math.random()-.5)*5);p.setXYZ(i,x,y,z)}})}
+function updFx(dt){const p=fx.geometry.attributes.position;fxd.forEach((q,i)=>{if(q.l>0){q.l-=dt;q.v.y-=6*dt;p.setXYZ(i,p.getX(i)+q.v.x*dt,p.getY(i)+q.v.y*dt,p.getZ(i)+q.v.z*dt);if(q.l<=0)p.setXYZ(i,0,-999,0)}});p.needsUpdate=true}
+let AC,nb;function audioInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();nb=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+ [196,294,392].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.012;o.connect(g).connect(AC.destination);o.start();const l=AC.createOscillator(),lg=AC.createGain();l.frequency.value=.07+i*.03;lg.gain.value=.008;l.connect(lg).connect(g.gain);l.start()});
+ const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=nb;s.loop=true;f.type='lowpass';f.frequency.value=500;g.gain.value=.015;s.connect(f).connect(g).connect(AC.destination);s.start()}catch(e){}}
+function tone(f,d=.15,ty='sine',v=.12,t0=0){if(!AC||!snd)return;const t=AC.currentTime+t0,o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d)}
+const sfx={click:()=>tone(660,.1,'sine',.1),open:()=>{tone(520,.12,'triangle');tone(780,.14,'triangle',.1,.08)},done:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.45,'triangle',.14,i*.12)),
+ step:()=>{if(!AC||!snd)return;const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=nb;f.type='lowpass';f.frequency.value=350;g.gain.value=.07;s.connect(f).connect(g).connect(AC.destination);s.start(0,Math.random(),.07)}};
+function toggleSnd(){snd=!snd;$('#snd').textContent='Suara: '+(snd?'aktif':'mati')}
+/* ---------- UI ---------- */
+function toast(m,c=''){const e=document.createElement('div');e.className='toast '+c;e.textContent=m;$('#toasts').appendChild(e);setTimeout(()=>e.remove(),3800)}
+const keys={};function openModal(h){$('#mbody').innerHTML=h;$('#modal').classList.remove('hide');modal=true;for(const k in keys)keys[k]=0;sfx.open()}
+function closeModal(){$('#modal').classList.add('hide');modal=false}
+function howTo(){openModal(`<h2>How to Play</h2><p>🚶 <b>WASD / Panah</b> untuk berjalan, <b>Shift</b> untuk lari, <b>seret mouse</b> memutar kamera.</p><p>✨ Dekati orb bercahaya, tekan <kbd>E</kbd>, lalu beri perspektif yang suportif.</p><p>📮 Tulis ceritamu di <b>Kotak Cerita</b> di Plaza. Ceritamu menjadi misi tanpa nama.</p><p>🌸 Setiap bantuan memberi XP dan membuat dunia semakin berbunga untuk semua orang.</p><button class="btn" onclick="closeModal()">Mengerti</button>`)}
+function about(){openModal(`<h2>About MindPlay</h2><p>MindPlay adalah prototype game edukasi sosial-emosional untuk siswa SMP/SMA/SMK, berfokus pada peer support dan pemecahan masalah bersama.</p><div class="note">Ini prototype dengan data contoh. Data hanya tersimpan di browser ini (localStorage), tidak terhubung ke backend, dan belum memiliki keamanan tingkat produksi. MindPlay tidak memberi diagnosis. Dukungan teman bukan pengganti Guru BK.</div><button class="btn" onclick="closeModal()">Tutup</button>`)}
+function showSelect(){$('#menu').classList.add('hide');$('#select').classList.remove('hide');$('#names').innerHTML=NAMES.map(n=>{const p=db.players[n];return`<button class="btn" onclick="start('${n}')">${n}<small>${p?'Level '+(Math.floor(p.xp/60)+1):'Baru'}</small></button>`}).join('')}
+function start(n){audioInit();sfx.click();me=n;P=db.players[n]||(db.players[n]={xp:0,active:[],done:[],ach:[],visited:[],shared:0,moods:[]});save();
+ $('#select').classList.add('hide');$('#hud').classList.remove('hide');state='play';pg.visible=true;pg.position.set(0,0,8);pg.rotation.y=Math.PI;yaw=0;pg.traverse(o=>{});pg.children[0].material=new THREE.MeshLambertMaterial({color:SHIRTS[NAMES.indexOf(n)%8]});
+ applyCos();rebuildOrbs();hud();
+ if(db.quests.some(q=>q.author===me&&q.solutions.length&&!q.seen))setTimeout(()=>toast('Ada teman yang memberi perspektif untukmu. Cek Area Refleksi 💛','good'),1500);
+ else setTimeout(()=>toast('Temui Kak Maya di Plaza untuk panduan','good'),800)}
+function pauseG(){state='pause';$('#pause').classList.remove('hide')}function resume(){state='play';$('#pause').classList.add('hide')}
+function toMenu(){$('#pause').classList.add('hide');$('#hud').classList.add('hide');pg.visible=false;state='menu';showSelect()}
+function resetAll(){if(confirm('Hapus semua data prototype (misi, XP, progres) di browser ini?')){localStorage.removeItem(KEY);location.reload()}}
+function hud(){$('#hn').textContent=me;$('#hl').textContent='Lv '+lvl();$('#hx').style.width=(P.xp%60)/60*100+'%';$('#hxt').textContent=P.xp+' XP';
+ const t=db.quests.length,d=db.quests.filter(q=>q.status==='completed').length;$('#qp').textContent=`Misi komunitas ${d}/${t} selesai · Aktifmu: ${P.active.filter(id=>db.quests.find(q=>q.id===id&&q.status!=='completed')).length}`;fm.count=Math.min(170,30+d*14)}
+function addXP(n){const l=lvl();P.xp+=n;if(lvl()>l){toast(`Level naik! Kamu Level ${lvl()} 🎉`,'gold');applyCos()}toast(`+${n} XP`,'good');save();hud()}
+function applyCos(){hat.visible=lvl()>=2;cape.visible=lvl()>=3}
+function checkAch(){ACH.forEach(([id,n,f])=>{if(!P.ach.includes(id)&&f(P)){P.ach.push(id);toast('Achievement: '+n,'gold');sfx.done()}});save()}
+let _d;function say(who,lines,done){_d={who,lines,i:0,done};nextSay(true)}
+function nextSay(first){if(!first)_d.i++;if(_d.i>=_d.lines.length){closeModal();_d.done&&_d.done();return}openModal(`<div class="who">${_d.who}</div><p class="say">${_d.lines[_d.i]}</p><button class="btn" onclick="nextSay()">${_d.i<_d.lines.length-1?'Lanjut':'Selesai'}</button>`)}
+function tip(){toast('💡 '+TIPS[Math.floor(Math.random()*TIPS.length)]);sfx.click()}
+const CRISIS=/bunuh diri|mengakhiri hidup|menyakiti diri|self.?harm|ingin mati|tidak ingin hidup/i;
+function urgent(){openModal(`<h2>Kamu tidak sendirian 💛</h2><p>Terima kasih sudah berani bercerita. Apa yang kamu tulis terdengar berat, dan kamu layak mendapat bantuan dari orang dewasa yang bisa mendampingimu langsung.</p><div class="note">Segera temui <b>Guru BK</b>, orang tua, atau orang dewasa yang kamu percaya hari ini. Jika kamu merasa tidak aman saat ini, minta seseorang menemanimu sekarang juga.</div><button class="btn" onclick="closeModal()">Baik</button>`)}
+function formProblem(){openModal(`<h2>📮 Kotak Cerita</h2><p>Ceritamu akan menjadi misi <b>tanpa nama</b> yang bisa ditemukan teman-teman.</p><label>Judul masalah</label><input id="ft" maxlength="60" placeholder="Contoh: Merasa sendirian di kelas"><label>Kategori</label><select id="fc">${Object.entries(CATS).map(([k,v])=>`<option value="${k}">${k} (${v})</option>`).join('')}</select><label>Ceritakan masalahmu</label><textarea id="fd" maxlength="400" placeholder="Tulis dengan bahasamu sendiri..."></textarea><div class="note">Jangan tulis nama orang atau data pribadi. Teman memberi dukungan, bukan diagnosis. Untuk masalah serius, temui Guru BK.</div><button class="btn" onclick="sendProblem()">Kirim jadi Misi</button> <button class="btn ghost" onclick="closeModal()">Batal</button>`)}
+function sendProblem(){const t=$('#ft').value.trim(),d=$('#fd').value.trim(),c=$('#fc').value;if(t.length<4||d.length<15){toast('Isi judul dan cerita (min. 15 huruf) dulu ya');return}
+ db.quests.push({id:'q'+Date.now(),title:t,desc:d,cat:c,author:me,solutions:[],status:'available'});P.shared++;save();closeModal();rebuildOrbs();toast('Ceritamu menjadi misi baru. Terima kasih sudah berani 💛','good');sfx.done();addXP(10);checkAch();hud();if(CRISIS.test(t+' '+d))setTimeout(urgent,600)}
+function openQuest(q){if(!P.active.includes(q.id)){P.active.push(q.id);save();toast('Misi diterima: '+q.title);hud()}
+ const ph=['Aku paham perasaanmu, itu pasti tidak mudah.','Kamu tidak salah merasa begitu. Mungkin kamu bisa coba ','Kamu tidak sendirian. Kalau terasa berat, bicaralah dengan Guru BK.'];
+ openModal(`<span class="tag">${CATS[q.cat]}</span><h2 style="margin-top:10px">${esc(q.title)}</h2><p>“${esc(q.desc)}”</p><div class="note">Pesan seorang teman (anonim). Dengarkan dengan empati, jangan menghakimi, dan beri saran yang suportif.</div><label>Perspektif / solusimu</label><textarea id="fs" maxlength="400" placeholder="Tulis dengan hangat dan ramah..."></textarea><div class="row">${ph.map((p,i)=>`<button class="chip" onclick="$('#fs').value+=PH[${i}]">${esc(p.slice(0,28))}…</button>`).join('')}</div><div class="row"><button class="btn alt" onclick="sendSol('${q.id}')">Kirim Solusi</button><button class="btn ghost" onclick="closeModal()">Nanti dulu</button></div>`);window.PH=ph}
+function sendSol(id){const q=db.quests.find(x=>x.id===id),t=$('#fs').value.trim();if(t.length<15){toast('Tulis sedikit lebih panjang ya (min. 15 huruf)');return}
+ if(/bodoh|goblok|bego|lebay|cengeng|dasar kamu/i.test(t)){toast('Coba tulis dengan lebih ramah dan tidak menghakimi 💛');return}
+ q.solutions.push({text:t});q.status='completed';P.active=P.active.filter(x=>x!==id);P.done.push(id);save();closeModal();burst(pg.position.x,2,pg.position.z);sfx.done();toast('Quest Completed! Perspektifmu sudah terkirim 🌟','gold');addXP(30);checkAch();rebuildOrbs();hud();
+ if(Math.random()<.5)setTimeout(()=>toast('Kamu membuat dunia sedikit lebih hangat 🌸'),1200)}
+function showBoard(){const av=db.quests.filter(q=>q.status!=='completed'&&q.author!==me),mine=av.filter(q=>P.active.includes(q.id)),d=db.quests.filter(q=>q.status==='completed').length;
+ openModal(`<h2>📋 Papan Misi</h2><p>Selesai (komunitas): <b>${d}</b> · Aktifmu: <b>${mine.length}</b> · Tersedia: <b>${av.length}</b></p>${av.length?av.map(q=>`<div class="li">${esc(q.title)}<br><small>${CATS[q.cat]} · cari orb di ${AN[AREA_OF[q.cat]]}${P.active.includes(q.id)?' · ✅ aktif':''}</small></div>`).join(''):'<p>Semua misi sudah terbantu. Terima kasih! 🌟</p>'}<div class="note">Misi ini tanpa identitas. Tidak ada peringkat dan kompetisi, hanya saling membantu.</div><button class="btn" onclick="closeModal()">Tutup</button>`)}
+function reflect(){const mine=db.quests.filter(q=>q.author===me);mine.forEach(q=>{if(q.solutions.length)q.seen=true});save();
+ openModal(`<h2>🌿 Area Refleksi</h2><p>Level ${lvl()} · ${P.xp} XP · Topi ${lvl()>=2?'✔':'(Lv 2)'} · Jubah ${lvl()>=3?'✔':'(Lv 3)'}</p><label>Bagaimana perasaanmu sekarang?</label><div>${['😞','😕','😐','🙂','😄'].map((e,i)=>`<button class="mood" onclick="mood(${i})">${e}</button>`).join('')}</div>
+ <label>Perspektif untukmu (anonim)</label>${mine.length?mine.map(q=>`<div class="li"><b>${esc(q.title)}</b><br>${q.solutions.length?q.solutions.map(s=>'💬 '+esc(s.text)).join('<br>'):'<small>Belum ada perspektif, sabar ya.</small>'}</div>`).join(''):'<p><small>Kamu belum menulis cerita. Kotak Cerita ada di Plaza.</small></p>'}
+ <label>Achievement</label><p>${P.ach.length?ACH.filter(a=>P.ach.includes(a[0])).map(a=>a[1]).join(' · '):'Belum ada. Ayo jelajahi dan bantu teman!'}</p><div class="note">Dukungan teman bukan pengganti Guru BK. Jika perasaanmu terus berat, temui Guru BK.</div><button class="btn" onclick="closeModal()">Tutup</button>`)}
+function mood(i){P.moods.push({i,t:Date.now()});save();checkAch();closeModal();toast(i<3?'Terima kasih sudah jujur. Perasaan itu valid. Kamu boleh bercerita ke Guru BK 💛':'Senang mendengarnya! Terus jaga dirimu 🌤️','good')}
+function guruBK(){say('Guru BK',['Halo, ' + me + '. Aku Guru BK. Aku fasilitator di dunia ini, dan pintuku selalu terbuka untukmu.','Teman bisa memberi dukungan, tapi tidak menggantikan bantuan profesional. Kalau ada masalah yang berat, datanglah menemuiku.'],()=>openModal(`<h2>Ringkasan untuk Refleksi Guru BK</h2><p><small>Data agregat tanpa identitas, tidak ada peringkat keparahan.</small></p>${Object.keys(CATS).map(c=>{const n=db.quests.filter(q=>q.cat===c).length;return`<div>${CATS[c]}: ${n}<div class="hbar" style="width:${Math.min(100,n*20)}%"></div></div>`}).join('')}<p>Misi terbantu: <b>${db.quests.filter(q=>q.status==='completed').length}</b> dari ${db.quests.length} · Perspektif terkirim: <b>${db.quests.reduce((a,q)=>a+q.solutions.length,0)}</b></p><button class="btn" onclick="closeModal()">Tutup</button>`))}
+/* ---------- ORBS ---------- */
+const orbG=new THREE.Group();scene.add(orbG);let orbs=[];
+function rebuildOrbs(){while(orbG.children.length)orbG.remove(orbG.children[0]);orbs=[];const cnt={};
+ db.quests.forEach(q=>{const a=AREA_OF[q.cat],n=cnt[a]=cnt[a]||0;cnt[a]++;if(q.status==='completed'||q.author===me)return;const[cx,cz]=ORBC[a],ang=n*1.3+.8,rr=6.4+n%3,x=cx+Math.cos(ang)*rr,z=cz+Math.sin(ang)*rr,c=CATCOL[q.cat],g=new THREE.Group();g.position.set(x,0,z);
+  const core=new THREE.Mesh(new THREE.SphereGeometry(.5,12,10),new THREE.MeshBasicMaterial({color:c})),halo=new THREE.Mesh(new THREE.SphereGeometry(.95,12,10),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.28,blending:THREE.AdditiveBlending,depthWrite:false})),
+  beam=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,9,8,1,true),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide})),ring=new THREE.Mesh(new THREE.TorusGeometry(.9,.06,6,20),new THREE.MeshBasicMaterial({color:0xffffff}));
+  core.position.y=halo.position.y=ring.position.y=2;beam.position.y=4.5;ring.rotation.x=Math.PI/2;g.add(core,halo,beam,ring);orbG.add(g);
+  orbs.push({x,z,q,g,core,halo,ring,r:3.4,name:`Misi · ${CATS[q.cat]}`,label:'untuk Membantu (Help)'})})}
+/* ---------- LOOP ---------- */
+let yaw=0,pitch=.5,dist=10,drag=false,mx=0,my=0,walkT=0,lastStep=0,cur=null;
+addEventListener('keydown',e=>{if(e.code==='Escape'){if(modal)closeModal();else if(state==='play')pauseG();else if(state==='pause')resume();return}
+ if(e.target.matches('input,textarea,select'))return;keys[e.code]=1;if(e.code==='KeyE'&&state==='play'&&!modal&&cur){sfx.click();cur.fn?cur.fn():openQuest(cur.q)}if(e.code.startsWith('Arrow'))e.preventDefault()});
+addEventListener('keyup',e=>keys[e.code]=0);
+const cv=renderer.domElement;cv.addEventListener('pointerdown',e=>{drag=true;mx=e.clientX;my=e.clientY});addEventListener('pointerup',()=>drag=false);
+addEventListener('pointermove',e=>{if(drag&&state==='play'&&!modal){yaw-=(e.clientX-mx)*.006;pitch=Math.max(.15,Math.min(1.1,pitch+(e.clientY-my)*.005));mx=e.clientX;my=e.clientY}});
+cv.addEventListener('wheel',e=>{dist=Math.max(6,Math.min(16,dist+e.deltaY*.01))},{passive:true});
+const camT=new THREE.Vector3();
+function step(dt,t){
+ let ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0),mv=!modal&&(ix||iz),u=pg.userData;
+ if(mv){const s=Math.sin(yaw),c=Math.cos(yaw);let dx=s*iz+c*ix,dz=c*iz-s*ix;const l=Math.hypot(dx,dz);dx/=l;dz/=l;const sp=(keys.ShiftLeft||keys.ShiftRight)?11:7;
+  pg.position.x+=dx*sp*dt;pg.position.z+=dz*sp*dt;let a=Math.atan2(dx,dz),d=a-pg.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));pg.rotation.y+=d*Math.min(1,14*dt);
+  walkT+=dt*(sp>7?14:10);const sw=Math.sin(walkT)*.9;u.aL.rotation.x=sw;u.aR.rotation.x=-sw;u.lL.rotation.x=-sw;u.lR.rotation.x=sw;pg.position.y=Math.abs(Math.sin(walkT))*.12;
+  const st=Math.floor(walkT/Math.PI);if(st!==lastStep){lastStep=st;sfx.step()}}
+ else{u.aL.rotation.x=Math.sin(t*2)*.08;u.aR.rotation.x=-Math.sin(t*2)*.08;u.lL.rotation.x=u.lR.rotation.x=0;pg.position.y=Math.sin(t*2)*.03}
+ const p=pg.position;for(const c of COL){const dx=p.x-c.x,dz=p.z-c.z,d=Math.hypot(dx,dz),m=c.r+.5;if(d<m){const k=m/(d||.001);p.x=c.x+dx*k;p.z=c.z+dz*k}}
+ const rr=Math.hypot(p.x,p.z);if(rr>41){p.x*=41/rr;p.z*=41/rr}
+ camT.set(p.x+Math.sin(yaw)*Math.cos(pitch)*dist,Math.max(.8,2+Math.sin(pitch)*dist),p.z+Math.cos(yaw)*Math.cos(pitch)*dist);
+ for(const c of COL){const dx=camT.x-c.x,dz=camT.z-c.z,d=Math.hypot(dx,dz);if(d<c.r+.5&&camT.y<c.h+.8){const k=(c.r+.5)/(d||.001);camT.x=c.x+dx*k;camT.z=c.z+dz*k}}
+ camera.position.lerp(camT,1-Math.exp(-9*dt));camera.lookAt(p.x,p.y+1.8,p.z);
+ for(const k in AREAS){const[x,z]=AREAS[k];if(!P.visited.includes(k)&&Math.hypot(p.x-x,p.z-z)<9){P.visited.push(k);toast('Menemukan: '+AN[k]);save();checkAch()}}
+ let b=null,bd=1e9;for(const o of STAT.concat(orbs)){const d=Math.hypot(o.x-p.x,o.z-p.z);if(d<o.r&&d<bd){b=o;bd=d}}cur=b;
+ const pr=$('#prompt');if(b&&!modal){pr.innerHTML=`<small>${b.name}</small><kbd>E</kbd>${b.label}`;pr.classList.remove('hide')}else pr.classList.add('hide');
+ [[npcMaya,5,3],[npcBK,-16,-11]].forEach(([n,x,z])=>{if(Math.hypot(p.x-x,p.z-z)<9)n.rotation.y=Math.atan2(p.x-x,p.z-z)});
+ drawMap()}
+const mc=$('#mm').getContext('2d');
+function drawMap(){const s=130/96,c=65;mc.clearRect(0,0,130,130);mc.fillStyle='#7fd3ea';mc.fillRect(0,0,130,130);mc.fillStyle='#8fd48f';mc.beginPath();mc.arc(c,c,44*s,0,7);mc.fill();
+ mc.fillStyle='#fff';for(const k in AREAS){mc.beginPath();mc.arc(c+AREAS[k][0]*s,c+AREAS[k][1]*s,3.5,0,7);mc.fill()}
+ mc.fillStyle='#ff7a59';orbs.forEach(o=>{mc.beginPath();mc.arc(c+o.x*s,c+o.z*s,2.5,0,7);mc.fill()});
+ mc.fillStyle='#2b3a4a';mc.beginPath();mc.arc(c+pg.position.x*s,c+pg.position.z*s,5,0,7);mc.fill()}
+const clock=new THREE.Clock();
+function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+ if(state==='play')step(dt,t);else if(state==='menu'){camera.position.set(Math.sin(t*.1)*40,17,Math.cos(t*.1)*40);camera.lookAt(0,2,0)}
+ orbs.forEach((o,i)=>{const y=Math.sin(t*2+i)*.3;o.core.position.y=o.halo.position.y=o.ring.position.y=2+y;o.ring.rotation.z=t*2;o.halo.scale.setScalar(1+Math.sin(t*3+i)*.1)});
+ swings.forEach((s,i)=>s.rotation.x=Math.sin(t*1.6+i)*.4);clouds.forEach(c=>{c.position.x+=dt*1.2;if(c.position.x>120)c.position.x=-120});
+ updFx(dt);renderer.render(scene,camera)}
+build();rebuildOrbs();loop();
+</script></body></html>
